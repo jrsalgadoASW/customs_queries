@@ -1,21 +1,4 @@
 /*
-
-
-
--- Empresa
-
-CDCIA_USUARIA
-DSCIA_USUARIA
-NIT_COMPANIA
-DSTIPO_ACTIVIDAD
-
--- Transporte
-MODO_TRANSPORTE
-
--- Importador
-NIT_IMPORTADOR
-NOMBRE_IMPORTADOR
-
 -- Omitidos
 
 EMBALAJE
@@ -48,6 +31,7 @@ FOB
 
 */
 
+-------Paises
 /*
 -- Paises
 Pais Cod_pais
@@ -62,17 +46,32 @@ COD_PAIS_BANDERA
 BANDERA
 */
 
+DROP TABLE IF EXISTS DimCountry;
 
--- SELECT  
---     COD_PAIS_ORIGEN AS CountryId, 
---     PAIS_ORIGEN as CountryName
--- INTO DimCountry
--- FROM  DataSemilla
--- GROUP BY COD_PAIS_ORIGEN, PAIS_ORIGEN;
+SELECT
+    COD_PAIS_ORIGEN AS CountryId,
+    PAIS_ORIGEN as CountryName
+INTO DimCountry
+FROM DataSemilla
+GROUP BY COD_PAIS_ORIGEN, PAIS_ORIGEN;
 
-SELECT * FROM DimCountry;
+UPDATE DimCountry
+SET CountryId = 0, 
+    CountryName = 'N/A'
+WHERE CountryId IS NULL AND CountryName IS NULL
 
--- DROP TABLE DimCountry;
+ALTER TABLE DimCountry
+ALTER COLUMN CountryId int NOT NULL;
+
+
+SELECT *
+FROM DimCountry
+ORDER BY CountryId;
+
+GO
+
+
+--------TIEMPO
 
 /*
 
@@ -85,123 +84,189 @@ FECHA_REVISION
 FECHA_RECHAZO
 FECHA_DIGITALIZACION
 */
--- WITH
---     combinedDates
---     AS
+DROP TABLE IF EXISTS DimDate;
 
---     (
+WITH
+    combinedDates
+    AS
 
---             SELECT DISTINCT FECHA_APROBACION
---             FROM DataSemilla
---         UNION
---             (
---             SELECT FECHA_DEFINITIVO
---             FROM DataSemilla
---     )
---         UNION
---             (
---             SELECT FECHA_DIGITALIZACION
---             FROM DataSemilla
---     )
---         UNION
---             (
---             SELECT FECHA_EJECUCION
---             FROM DataSemilla
---     )
---         UNION
---             (
---             SELECT FECHA_RECHAZO
---             FROM DataSemilla
---     )
---         UNION
---             (
---             SELECT FECHA_REVISION
---             FROM DataSemilla
---     )
---     )
--- SELECT DISTINCT
---     YEAR(FECHA_APROBACION) AS DateYear,
---     MONTH(FECHA_APROBACION) AS DateMonth,
---     DAY(FECHA_APROBACION) AS DateDay,
---     DATEPART(hour,FECHA_APROBACION) AS DateHour
--- INTO DimDate
--- FROM combinedDates
--- ORDER BY 
---         DateYear, 
---         DateMonth, 
---         DateDay, 
---         DateHour;
+    (
 
-SELECT * FROM DimDate
+            SELECT DISTINCT FECHA_APROBACION
+            FROM DataSemilla
+        UNION
+            (
+            SELECT FECHA_DEFINITIVO
+            FROM DataSemilla
+    )
+        UNION
+            (
+            SELECT FECHA_DIGITALIZACION
+            FROM DataSemilla
+    )
+        UNION
+            (
+            SELECT FECHA_EJECUCION
+            FROM DataSemilla
+    )
+        UNION
+            (
+            SELECT FECHA_RECHAZO
+            FROM DataSemilla
+    )
+        UNION
+            (
+            SELECT FECHA_REVISION
+            FROM DataSemilla
+    )
+    )
+SELECT DISTINCT
+    YEAR(FECHA_APROBACION) AS DateYear,
+    MONTH(FECHA_APROBACION) AS DateMonth,
+    DAY(FECHA_APROBACION) AS DateDay,
+    DATEPART(hour,FECHA_APROBACION) AS DateHour
+INTO DimDate
+FROM combinedDates
+ORDER BY 
+        DateYear, 
+        DateMonth, 
+        DateDay, 
+        DateHour;
+
+SELECT *
+FROM DimDate
 ORDER BY DateYear, 
         DateMonth, 
         DateDay, 
         DateHour;
 
+---------------------------------------PRODUCTO
 /*
-
--- Producto
-
 COD_ITEM
 ITEM
 TIPO_ITEM
 UNIDAD_MEDIDA
 EMBALAJE
 */
+DROP TABLE IF EXISTS DimProdct;
 
--- SELECT DISTINCT 
---     COD_ITEM, 
---     ITEM,
---     TIPO_ITEM, 
---     UNIDAD_MEDIDA
--- INTO DimProduct
--- FROM Datasemilla
+SELECT DISTINCT 
+    COD_ITEM, 
+    ITEM,
+    TIPO_ITEM, 
+    UNIDAD_MEDIDA
+INTO DimProduct
+FROM Datasemilla
 
-SELECT * DimProduct;
+SELECT *
+DimProduct;
+
+
+---------------------------------------SIA
 
 /*
--- SIA (Intermedario)
 
 NIT_SIA
 NOMBRE_SIA
 
 */
 
--- SELECT DISTINCT 
---     NIT_SIA, 
---     NOMBRE_SIA
--- INTO DimSia
--- FROM Datasemilla;
+DROP TABLE IF EXISTS DimProdct;
 
-SELECT * FROM DimSia
+SELECT DISTINCT 
+    NIT_SIA, 
+    NOMBRE_SIA
+INTO DimSia
+FROM Datasemilla;
 
+SELECT *
+FROM DimSia
+
+
+--------------------------------------- TRANSACTION
 
 /*
-
--- Transaccion DimTransaction
-
 TIPO
 CDTRANSACCION
 DSTRANSACCION
 */
--- SELECT DISTINCT 
---     CDTRANSACCION, 
---     DSTRANSACCION
--- INTO DimTransaction
--- FROM Datasemilla;
 
-SELECT * FROM DimTransaction;
+DROP TABLE IF EXISTS DimTransaction;
+
+SELECT DISTINCT 
+    CDTRANSACCION, 
+    DSTRANSACCION
+INTO DimTransaction
+FROM Datasemilla;
+
+SELECT *
+FROM DimTransaction;
+
+
+
+
+-----------------------------------------Estado
 /*
 
--- Estado
 
 CDESTADO
 DSESTADO
 */
+DROP TABLE IF EXISTS DimStatus;
 -- SELECT DISTINCT 
 --     CDESTADO, 
 --     DSESTADO
 -- INTO DimStatus
 -- FROM Datasemilla;
 
-SELECT * FROM DimStatus;
+SELECT *
+FROM DimStatus;
+
+----------------------------------------EMPRESA
+DROP TABLE IF EXISTS DimCompany;
+
+SELECT DISTINCT
+    CDCIA_USUARIA,
+    DSCIA_USUARIA,
+    NIT_COMPANIA,
+    DSTIPO_ACTIVIDAD
+INTO DimCompany
+FROM DataSemilla
+
+SELECT *
+FROM DimCompany;
+
+---------------------------------------Transporte
+/*
+-- Transporte
+MODO_TRANSPORTE
+*/
+
+
+DROP TABLE IF EXISTS DimTransport;
+
+SELECT DISTINCT
+MODO_TRANSPORTE
+INTO DimTransport
+FROM Datasemilla
+WHERE MODO_TRANSPORTE IS NOT NULL;
+
+SELECT * FROM DimTransport
+
+-------------------------------------------- Importador
+/*
+NIT_IMPORTADOR
+NOMBRE_IMPORTADOR
+*/
+
+DROP TABLE IF EXISTS DimImporter;
+
+SELECT DISTINCT
+NIT_IMPORTADOR,
+NOMBRE_IMPORTADOR
+INTO DimImporter
+FROM Datasemilla
+WHERE NIT_IMPORTADOR IS NOT NULL
+
+SELECT * FROM  DimImporter;
+
