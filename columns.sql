@@ -1,19 +1,6 @@
 /*
 
--- SIA (Intermedario)
 
-NIT_SIA
-NOMBRE_SIA
-
--- Transaccion
-
-[F] TIPO
-CDTRANSACCION
-DSTRANSACCION
--- Estado
-
-CDESTADO
-DSESTADO
 
 -- Empresa
 
@@ -162,10 +149,59 @@ UNIDAD_MEDIDA
 EMBALAJE
 */
 
-SELECT DISTINCT 
-    COD_ITEM, 
-    ITEM,
-    TIPO_ITEM, 
-    UNIDAD_MEDIDA
-INTO DimProduct
-FROM Datasemilla
+-- SELECT DISTINCT 
+--     COD_ITEM, 
+--     ITEM,
+--     TIPO_ITEM, 
+--     UNIDAD_MEDIDA
+-- INTO DimProduct
+-- FROM Datasemilla
+
+SELECT * DimProduct;
+
+/*
+-- SIA (Intermedario)
+
+NIT_SIA
+NOMBRE_SIA
+
+*/
+
+-- SELECT DISTINCT 
+--     NIT_SIA, 
+--     NOMBRE_SIA
+-- INTO DimSia
+-- FROM Datasemilla;
+
+SELECT * FROM DimSia
+
+
+/*
+
+-- Transaccion DimTransaction
+
+TIPO
+CDTRANSACCION
+DSTRANSACCION
+*/
+-- SELECT DISTINCT 
+--     CDTRANSACCION, 
+--     DSTRANSACCION
+-- INTO DimTransaction
+-- FROM Datasemilla;
+
+SELECT * FROM DimTransaction;
+/*
+
+-- Estado
+
+CDESTADO
+DSESTADO
+*/
+-- SELECT DISTINCT 
+--     CDESTADO, 
+--     DSESTADO
+-- INTO DimStatus
+-- FROM Datasemilla;
+
+SELECT * FROM DimStatus;
