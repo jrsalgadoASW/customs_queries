@@ -63,12 +63,9 @@ WHERE CountryId IS NULL AND CountryName IS NULL
 ALTER TABLE DimCountry
 ALTER COLUMN CountryId int NOT NULL;
 
-
 SELECT *
 FROM DimCountry
 ORDER BY CountryId;
-
-GO
 
 
 --------TIEMPO
@@ -133,12 +130,16 @@ ORDER BY
         DateDay, 
         DateHour;
 
+ALTER TABLE DimDate 
+ADD DateId INT IDENTITY(1,1) PRIMARY KEY;
+
 SELECT *
 FROM DimDate
 ORDER BY DateYear, 
         DateMonth, 
         DateDay, 
         DateHour;
+
 
 ---------------------------------------PRODUCTO
 /*
@@ -148,18 +149,25 @@ TIPO_ITEM
 UNIDAD_MEDIDA
 EMBALAJE
 */
-DROP TABLE IF EXISTS DimProdct;
+DROP TABLE IF EXISTS DimProduct;
 
 SELECT DISTINCT 
     COD_ITEM, 
     ITEM,
-    TIPO_ITEM, 
+    TIPO_ITEM,
     UNIDAD_MEDIDA
 INTO DimProduct
-FROM Datasemilla
+FROM Datasemilla;
 
-SELECT *
-DimProduct;
+ALTER TABLE DimProduct 
+ADD ProductId INT IDENTITY(1,1) PRIMARY KEY;
+
+SELECT * FROM DimProduct;
+
+-- SELECT  ITEM, TIPO_ITEM, UNIDAD_MEDIDA, COUNT(COD_ITEM) as count
+-- FROM DimProduct
+-- GROUP BY  ITEM, TIPO_ITEM, UNIDAD_MEDIDA
+-- HAVING COUNT(COD_ITEM) > 1;
 
 
 ---------------------------------------SIA
@@ -171,7 +179,7 @@ NOMBRE_SIA
 
 */
 
-DROP TABLE IF EXISTS DimProdct;
+DROP TABLE IF EXISTS DimSia;
 
 SELECT DISTINCT 
     NIT_SIA, 
@@ -179,8 +187,13 @@ SELECT DISTINCT
 INTO DimSia
 FROM Datasemilla;
 
+ALTER TABLE DimSia
+ADD siaID INT PRIMARY KEY IDENTITY(1,1);
+
+
 SELECT *
-FROM DimSia
+FROM DimSia;
+
 
 
 --------------------------------------- TRANSACTION
@@ -199,6 +212,12 @@ SELECT DISTINCT
 INTO DimTransaction
 FROM Datasemilla;
 
+ALTER TABLE DimTransaction
+ALTER COLUMN CDTRANSACCION INT NOT NULL;
+
+ALTER TABLE DimTransaction
+ADD CONSTRAINT DimTransaction_PK PRIMARY KEY (CDTRANSACCION);
+
 SELECT *
 FROM DimTransaction;
 
@@ -213,14 +232,22 @@ CDESTADO
 DSESTADO
 */
 DROP TABLE IF EXISTS DimStatus;
--- SELECT DISTINCT 
---     CDESTADO, 
---     DSESTADO
--- INTO DimStatus
--- FROM Datasemilla;
+
+SELECT DISTINCT 
+    CDESTADO, 
+    DSESTADO
+INTO DimStatus
+FROM Datasemilla;
+
+ALTER TABLE DimStatus
+ALTER COLUMN CDESTADO VARCHAR(50) NOT NULL;
+
+ALTER TABLE DimStatus
+ADD CONSTRAINT DimStatus_PK PRIMARY KEY (CDESTADO);
 
 SELECT *
 FROM DimStatus;
+
 
 ----------------------------------------EMPRESA
 DROP TABLE IF EXISTS DimCompany;
@@ -232,6 +259,12 @@ SELECT DISTINCT
     DSTIPO_ACTIVIDAD
 INTO DimCompany
 FROM DataSemilla
+
+ALTER TABLE DimCompany
+ALTER COLUMN CDCIA_USUARIA NVARCHAR(50) NOT NULL;
+
+ALTER TABLE DimCompany
+ADD CONSTRAINT DimCompanu_PK PRIMARY KEY (CDCIA_USUARIA);
 
 SELECT *
 FROM DimCompany;
@@ -248,10 +281,19 @@ DROP TABLE IF EXISTS DimTransport;
 SELECT DISTINCT
 MODO_TRANSPORTE
 INTO DimTransport
-FROM Datasemilla
-WHERE MODO_TRANSPORTE IS NOT NULL;
+FROM Datasemilla;
 
-SELECT * FROM DimTransport
+UPDATE DimTransport
+SET MODO_TRANSPORTE = 'SIN ESPECIFICAR'
+WHERE MODO_TRANSPORTE IS NULL; 
+
+ALTER TABLE DimTransport
+ALTER COLUMN MODO_TRANSPORTE NVARCHAR(50) NOT NULL;
+
+ALTER TABLE DimTransport
+ADD CONSTRAINT DimTransport_PK PRIMARY KEY (MODO_TRANSPORTE);
+
+SELECT * FROM DimTransport;
 
 -------------------------------------------- Importador
 /*
@@ -268,5 +310,11 @@ INTO DimImporter
 FROM Datasemilla
 WHERE NIT_IMPORTADOR IS NOT NULL
 
-SELECT * FROM  DimImporter;
+ALTER TABLE DimImporter
+ALTER COLUMN NIT_IMPORTADOR VARCHAR(50) NOT NULL;
+
+ALTER TABLE DimImporter
+ADD CONSTRAINT DimImporter_PK PRIMARY KEY (NIT_IMPORTADOR);
+
+SELECT * FROM DimImporter;
 
