@@ -83,43 +83,6 @@ CANTIDAD
 PRECIO
 NMCONVERSION
 */
-
-
-CREATE TABLE FactImportRegistry
-(
-    IdFact INT IDENTITY(1,1) PRIMARY KEY,
-
-    NIT_IMPORTADOR VARCHAR(50) ,
-    MODO_TRANSPORTE NVARCHAR(50),
-    CDCIA_USUARIA NVARCHAR(50),
-    CDESTADO VARCHAR(50),
-    CDTRANSACCION INT,
-    siaID INT,
-    ProductId INT,
-    DateId INT,
-    CountryId INT,
-
-
-    CANTIDAD float,
-    PRECIO float,
-    PESO_BRUTO float,
-    PESO_NETO float,
-    -- TODO: Ver cual de los campos es calculados. 
-    FLETES float,
-    FOB float,
-
-    FOREIGN KEY (MODO_TRANSPORTE) REFERENCES DimTransport(MODO_TRANSPORTE),
-    FOREIGN KEY (CDCIA_USUARIA) REFERENCES DimCompany(CDCIA_USUARIA),
-    FOREIGN KEY (CDESTADO) REFERENCES DimStatus(CDESTADO),
-    FOREIGN KEY (CDTRANSACCION) REFERENCES DimTransaction(CDTRANSACCION),
-    FOREIGN KEY (siaID) REFERENCES DimSia(siaID),
-    FOREIGN KEY (ProductId) REFERENCES DimProduct(ProductId),
-    FOREIGN KEY (DateId) REFERENCES DimDate(DateId),
-    FOREIGN KEY (CountryId) REFERENCES DimCountry(CountryId),
-    FOREIGN KEY (NIT_IMPORTADOR) REFERENCES DimImporter(NIT_IMPORTADOR)
-);
-
-
 SELECT *
 FROM FactImportRegistry;
 
