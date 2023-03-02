@@ -84,58 +84,43 @@ FECHA_EJECUCION
 FECHA_REVISION
 FECHA_RECHAZO
 FECHA_DIGITALIZACION
+
+TODO: Hacer tabla de calendario. 
 */
 DROP TABLE IF EXISTS DimDate;
 
+DECLARE @StartDate DATETIME;
+DECLARE @EndDate DATETIME;
+SET @StartDate = '2008-01-01';
+SET @EndDate = '2028-12-31';
 WITH
-    combinedDates
+    DateSequence
     AS
-
     (
-
-            SELECT DISTINCT FECHA_APROBACION
-            FROM DataSemilla
-        UNION
-            (
-            SELECT FECHA_DEFINITIVO
-            FROM DataSemilla
+                    SELECT @StartDate AS DateTimeValue
+        UNION ALL
+            SELECT DATEADD(hour, 1, DateTimeValue)
+            FROM DateSequence
+            WHERE DateTimeValue < @EndDate
     )
-        UNION
-            (
-            SELECT FECHA_DIGITALIZACION
-            FROM DataSemilla
-    )
-        UNION
-            (
-            SELECT FECHA_EJECUCION
-            FROM DataSemilla
-    )
-        UNION
-            (
-            SELECT FECHA_RECHAZO
-            FROM DataSemilla
-    )
-        UNION
-            (
-            SELECT FECHA_REVISION
-            FROM DataSemilla
-    )
-    )
-SELECT DISTINCT
-    YEAR(FECHA_APROBACION) AS DateYear,
-    MONTH(FECHA_APROBACION) AS DateMonth,
-    DAY(FECHA_APROBACION) AS DateDay,
-    DATEPART(hour,FECHA_APROBACION) AS DateHour
+SELECT
+    YEAR(DateTimeValue) AS DateYear,
+    MONTH(DateTimeValue) AS DateMonth,
+    DAY(DateTimeValue) AS DateDay,
+    DATEPART(hour,DateTimeValue) AS DateHour,
+    DATEPART(WEEKDAY, DateTimeValue) AS DateWeekDay,
+    DATENAME(WEEKDAY, DateTimeValue) AS DateWeekDayName,
+    DATENAME(MONTH, DateTimeValue) AS DateMonthName
 INTO DimDate
-FROM combinedDates
-ORDER BY 
-        DateYear, 
-        DateMonth, 
-        DateDay, 
-        DateHour;
+FROM DateSequence
+OPTION
+(MAXRECURSION
+0);
 
+-- TODO: Agregar Semestre y ID para valores null.
 ALTER TABLE DimDate 
 ADD DateId INT IDENTITY(1,1) PRIMARY KEY;
+
 
 SELECT *
 FROM DimDate
@@ -155,8 +140,8 @@ EMBALAJE
 */
 DROP TABLE IF EXISTS DimProduct;
 
-SELECT DISTINCT 
-    COD_ITEM, 
+SELECT DISTINCT
+    COD_ITEM,
     ITEM,
     TIPO_ITEM,
     UNIDAD_MEDIDA
@@ -166,12 +151,15 @@ FROM Datasemilla;
 ALTER TABLE DimProduct 
 ADD ProductId INT IDENTITY(1,1) PRIMARY KEY;
 
-SELECT * FROM DimProduct;
+SELECT *
+FROM DimProduct
+ORDER BY COD_ITEM;
 
--- SELECT  ITEM, TIPO_ITEM, UNIDAD_MEDIDA, COUNT(COD_ITEM) as count
+
+-- SELECT  COUNT(ITEM) as itemcount, TIPO_ITEM, UNIDAD_MEDIDA, (COD_ITEM) 
 -- FROM DimProduct
--- GROUP BY  ITEM, TIPO_ITEM, UNIDAD_MEDIDA
--- HAVING COUNT(COD_ITEM) > 1;
+-- GROUP BY  COD_ITEM, TIPO_ITEM, UNIDAD_MEDIDA
+-- HAVING COUNT(ITEM) > 1;
 
 
 ---------------------------------------SIA
@@ -185,8 +173,8 @@ NOMBRE_SIA
 
 DROP TABLE IF EXISTS DimSia;
 
-SELECT DISTINCT 
-    NIT_SIA, 
+SELECT DISTINCT
+    NIT_SIA,
     NOMBRE_SIA
 INTO DimSia
 FROM Datasemilla;
@@ -202,28 +190,29 @@ FROM DimSia;
 
 --------------------------------------- TRANSACTION
 
+
 /*
 TIPO
 CDTRANSACCION
 DSTRANSACCION
 */
 
-DROP TABLE IF EXISTS DimTransaction;
+DROP TABLE IF EXISTS DimTransactionType;
 
-SELECT DISTINCT 
-    CDTRANSACCION, 
+SELECT DISTINCT
+    CDTRANSACCION,
     DSTRANSACCION
-INTO DimTransaction
+INTO DimTransactionType
 FROM Datasemilla;
 
-ALTER TABLE DimTransaction
+ALTER TABLE DimTransactionType
 ALTER COLUMN CDTRANSACCION INT NOT NULL;
 
-ALTER TABLE DimTransaction
+ALTER TABLE DimTransactionType
 ADD CONSTRAINT DimTransaction_PK PRIMARY KEY (CDTRANSACCION);
 
 SELECT *
-FROM DimTransaction;
+FROM DimTransactionType;
 
 
 
@@ -237,8 +226,8 @@ DSESTADO
 */
 DROP TABLE IF EXISTS DimStatus;
 
-SELECT DISTINCT 
-    CDESTADO, 
+SELECT DISTINCT
+    CDESTADO,
     DSESTADO
 INTO DimStatus
 FROM Datasemilla;
@@ -273,31 +262,6 @@ ADD CONSTRAINT DimCompanu_PK PRIMARY KEY (CDCIA_USUARIA);
 SELECT *
 FROM DimCompany;
 
----------------------------------------Transporte
-/*
--- Transporte
-MODO_TRANSPORTE
-*/
-
-
-DROP TABLE IF EXISTS DimTransport;
-
-SELECT DISTINCT
-MODO_TRANSPORTE
-INTO DimTransport
-FROM Datasemilla;
-
-UPDATE DimTransport
-SET MODO_TRANSPORTE = 'SIN ESPECIFICAR'
-WHERE MODO_TRANSPORTE IS NULL; 
-
-ALTER TABLE DimTransport
-ALTER COLUMN MODO_TRANSPORTE NVARCHAR(50) NOT NULL;
-
-ALTER TABLE DimTransport
-ADD CONSTRAINT DimTransport_PK PRIMARY KEY (MODO_TRANSPORTE);
-
-SELECT * FROM DimTransport;
 
 -------------------------------------------- Importador
 /*
@@ -308,8 +272,8 @@ NOMBRE_IMPORTADOR
 DROP TABLE IF EXISTS DimImporter;
 
 SELECT DISTINCT
-NIT_IMPORTADOR,
-NOMBRE_IMPORTADOR
+    NIT_IMPORTADOR,
+    NOMBRE_IMPORTADOR
 INTO DimImporter
 FROM Datasemilla
 WHERE NIT_IMPORTADOR IS NOT NULL
@@ -320,5 +284,6 @@ ALTER COLUMN NIT_IMPORTADOR VARCHAR(50) NOT NULL;
 ALTER TABLE DimImporter
 ADD CONSTRAINT DimImporter_PK PRIMARY KEY (NIT_IMPORTADOR);
 
-SELECT * FROM DimImporter;
+SELECT *
+FROM DimImporter;
 
