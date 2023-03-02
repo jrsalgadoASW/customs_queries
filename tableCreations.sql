@@ -31,6 +31,18 @@ FOB
 
 */
 
+DROP TABLE IF EXISTS FactImportRegistry;
+
+DROP TABLE IF EXISTS DimCountry;
+DROP TABLE IF EXISTS DimDate;
+DROP TABLE IF EXISTS DimProduct;
+DROP TABLE IF EXISTS DimSia;
+DROP TABLE IF EXISTS DimTransactionType;
+DROP TABLE IF EXISTS DimStatus;
+DROP TABLE IF EXISTS DimCompany;
+DROP TABLE IF EXISTS DimImporter;
+
+GO
 -------Paises
 /*
 -- Paises
@@ -46,7 +58,6 @@ COD_PAIS_BANDERA
 BANDERA
 */
 
-DROP TABLE IF EXISTS DimCountry;
 
 SELECT
     COD_PAIS_ORIGEN AS CountryId,
@@ -66,10 +77,7 @@ ALTER COLUMN CountryId INT NOT NULL;
 ALTER TABLE DimCountry
 ADD CONSTRAINT DimCountry_PK PRIMARY KEY (CountryId);
 
-
-SELECT *
-FROM DimCountry
-ORDER BY CountryId;
+GO
 
 
 --------TIEMPO
@@ -86,7 +94,6 @@ FECHA_RECHAZO
 FECHA_DIGITALIZACION
 
 */
-DROP TABLE IF EXISTS DimDate;
 
 DECLARE @StartDate DATETIME;
 DECLARE @EndDate DATETIME;
@@ -138,13 +145,8 @@ SET Semester = CASE WHEN DateMonth <= 6 THEN '1st semestre'
                     ELSE '2nd semestre'
                END;
         
-SELECT *
-FROM DimDate
-ORDER BY DateYear, 
-        DateMonth, 
-        DateDay, 
-        DateHour;
 
+GO
 
 ---------------------------------------PRODUCTO
 /*
@@ -154,7 +156,6 @@ TIPO_ITEM
 UNIDAD_MEDIDA
 EMBALAJE
 */
-DROP TABLE IF EXISTS DimProduct;
 
 SELECT DISTINCT
     COD_ITEM,
@@ -167,15 +168,7 @@ FROM Datasemilla;
 ALTER TABLE DimProduct 
 ADD ProductId INT IDENTITY(1,1) PRIMARY KEY;
 
-SELECT *
-FROM DimProduct
-ORDER BY COD_ITEM;
-
-
--- SELECT  COUNT(ITEM) as itemcount, TIPO_ITEM, UNIDAD_MEDIDA, (COD_ITEM) 
--- FROM DimProduct
--- GROUP BY  COD_ITEM, TIPO_ITEM, UNIDAD_MEDIDA
--- HAVING COUNT(ITEM) > 1;
+GO
 
 
 ---------------------------------------SIA
@@ -187,7 +180,6 @@ NOMBRE_SIA
 
 */
 
-DROP TABLE IF EXISTS DimSia;
 
 SELECT DISTINCT
     NIT_SIA,
@@ -198,11 +190,7 @@ FROM Datasemilla;
 ALTER TABLE DimSia
 ADD siaID INT PRIMARY KEY IDENTITY(1,1);
 
-
-SELECT *
-FROM DimSia;
-
-
+GO
 
 --------------------------------------- TRANSACTION
 
@@ -213,7 +201,6 @@ CDTRANSACCION
 DSTRANSACCION
 */
 
-DROP TABLE IF EXISTS DimTransactionType;
 
 SELECT DISTINCT
     CDTRANSACCION,
@@ -227,10 +214,7 @@ ALTER COLUMN CDTRANSACCION INT NOT NULL;
 ALTER TABLE DimTransactionType
 ADD CONSTRAINT DimTransaction_PK PRIMARY KEY (CDTRANSACCION);
 
-SELECT *
-FROM DimTransactionType;
-
-
+GO
 
 
 -----------------------------------------Estado
@@ -240,7 +224,6 @@ FROM DimTransactionType;
 CDESTADO
 DSESTADO
 */
-DROP TABLE IF EXISTS DimStatus;
 
 SELECT DISTINCT
     CDESTADO,
@@ -254,12 +237,10 @@ ALTER COLUMN CDESTADO VARCHAR(50) NOT NULL;
 ALTER TABLE DimStatus
 ADD CONSTRAINT DimStatus_PK PRIMARY KEY (CDESTADO);
 
-SELECT *
-FROM DimStatus;
+GO
 
 
 ----------------------------------------EMPRESA
-DROP TABLE IF EXISTS DimCompany;
 
 SELECT DISTINCT
     CDCIA_USUARIA,
@@ -275,9 +256,7 @@ ALTER COLUMN CDCIA_USUARIA NVARCHAR(50) NOT NULL;
 ALTER TABLE DimCompany
 ADD CONSTRAINT DimCompanu_PK PRIMARY KEY (CDCIA_USUARIA);
 
-SELECT *
-FROM DimCompany;
-
+GO
 
 -------------------------------------------- Importador
 /*
@@ -285,7 +264,6 @@ NIT_IMPORTADOR
 NOMBRE_IMPORTADOR
 */
 
-DROP TABLE IF EXISTS DimImporter;
 
 SELECT DISTINCT
     NIT_IMPORTADOR,
@@ -300,6 +278,40 @@ ALTER COLUMN NIT_IMPORTADOR VARCHAR(50) NOT NULL;
 ALTER TABLE DimImporter
 ADD CONSTRAINT DimImporter_PK PRIMARY KEY (NIT_IMPORTADOR);
 
-SELECT *
-FROM DimImporter;
+GO
+------------------------------------------------FACTS
 
+CREATE TABLE FactImportRegistry
+(
+    IdFact INT IDENTITY(1,1) PRIMARY KEY,
+
+    NIT_IMPORTADOR VARCHAR(50) ,
+    MODO_TRANSPORTE NVARCHAR(50),
+    CDCIA_USUARIA NVARCHAR(50),
+    CDESTADO VARCHAR(50),
+    CDTRANSACCION INT,
+    siaID INT,
+    ProductId INT,
+    DateId INT,
+    CountryId INT,
+
+
+    CANTIDAD float,
+    PRECIO float,
+    PESO_BRUTO float,
+    PESO_NETO float,
+    -- TODO: Ver cual de los campos es calculados. 
+    FLETES float,
+    FOB float,
+
+    FOREIGN KEY (CDCIA_USUARIA) REFERENCES DimCompany(CDCIA_USUARIA),
+    FOREIGN KEY (CDESTADO) REFERENCES DimStatus(CDESTADO),
+    FOREIGN KEY (CDTRANSACCION) REFERENCES DimTransactionType(CDTRANSACCION),
+    FOREIGN KEY (siaID) REFERENCES DimSia(siaID),
+    FOREIGN KEY (ProductId) REFERENCES DimProduct(ProductId),
+    FOREIGN KEY (DateId) REFERENCES DimDate(DateId),
+    FOREIGN KEY (CountryId) REFERENCES DimCountry(CountryId),
+    FOREIGN KEY (NIT_IMPORTADOR) REFERENCES DimImporter(NIT_IMPORTADOR)
+);
+
+GO

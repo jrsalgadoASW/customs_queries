@@ -84,7 +84,6 @@ PRECIO
 NMCONVERSION
 */
 
-DROP TABLE IF EXISTS FactImportRegistry;
 
 CREATE TABLE FactImportRegistry
 (
@@ -124,22 +123,35 @@ CREATE TABLE FactImportRegistry
 SELECT *
 FROM FactImportRegistry;
 
-SELECT PRECIO, CANTIDAD, ((CANTIDAD*PRECIO)+FLETES) AS MAYBE_FOB , FOB, FLETES
-FROM DataSemilla;
-SELECT DateId
-FROM DimDate
-    INNER JOIN DataSemilla ds
-    ON (DATEPART(WEEKDAY,ds.FECHA_RECHAZO) = DimDate.DateDay) AND
-        (DATEPART(MONTH,ds.FECHA_RECHAZO) = DimDate.DateMonth) AND
-        (DATEPART(YEAR,ds.FECHA_RECHAZO) = DimDate.DateYear) AND
-        (DATEPART(HOUR,ds.FECHA_RECHAZO) = DimDate.DateHour)
-    --     OR (
-    --  (DATEPART(WEEKDAY,ds.FECHA_RECHAZO) IS NULL AND DimDate.DateDay IS NULL)
-    -- )
-    INNER JOIN DimProduct dp
-    ON 
-    (dp.COD_ITEM = ds.COD_ITEM) AND
-        (dp.ITEM = ds.ITEM) AND
-        (dp.UNIDAD_MEDIDA = ds.UNIDAD_MEDIDA) AND
-        (dp.TIPO_ITEM = ds.TIPO_ITEM)
-ORDER BY DateId;
+WITH FechaRechazoNoNull AS (
+SELECT dd.DateDay, dd.DateHour, dd.DateId, dd.DateMonth, dd.DateYear
+FROM DimDate dd
+INNER JOIN DataSemilla ds ON
+    (DATEPART(WEEKDAY,ds.FECHA_RECHAZO) = dd.DateDay) AND
+    (DATEPART(MONTH,ds.FECHA_RECHAZO) = dd.DateMonth) AND
+    (DATEPART(YEAR,ds.FECHA_RECHAZO) = dd.DateYear) AND
+    (DATEPART(HOUR,ds.FECHA_RECHAZO) = dd.DateHour)
+
+), FechaRechazoNull AS(
+SELECT dd.DateDay, dd.DateHour, dd.DateId, dd.DateMonth, dd.DateYear
+FROM DimDate dd
+INNER JOIN DataSemilla ds ON
+
+     (DATEPART(WEEKDAY,ds.FECHA_RECHAZO) IS NULL AND dd.DateDay IS NULL)
+), FechaRechazo AS(
+
+SELECT * FROM FechaRechazoNoNull UNION ALL (
+    SELECT * FROM FechaRechazoNull
+)
+) SELECT * FROM FechaRechazo;
+
+
+-- SELECT dd.DateId
+-- FROM DataSemilla ds
+--     INNER JOIN DimDate dd ON
+--     (DATEPART(WEEKDAY,ds.FECHA_RECHAZO) = dd.DateDay) AND
+--         (DATEPART(MONTH,ds.FECHA_RECHAZO) = dd.DateMonth) AND
+--         (DATEPART(YEAR,ds.FECHA_RECHAZO) = dd.DateYear) AND
+--         (DATEPART(HOUR,ds.FECHA_RECHAZO) = dd.DateHour)
+--         OR
+--         (DATEPART(WEEKDAY,ds.FECHA_RECHAZO) IS NULL AND dd.DateDay IS NULL)
