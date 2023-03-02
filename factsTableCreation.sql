@@ -86,7 +86,8 @@ NMCONVERSION
 
 DROP TABLE IF EXISTS FactImportRegistry;
 
-CREATE TABLE FactImportRegistry(
+CREATE TABLE FactImportRegistry
+(
     IdFact INT IDENTITY(1,1) PRIMARY KEY,
 
     NIT_IMPORTADOR VARCHAR(50) ,
@@ -120,28 +121,25 @@ CREATE TABLE FactImportRegistry(
 );
 
 
-SELECT * FROM FactImportRegistry;
+SELECT *
+FROM FactImportRegistry;
 
--- SELECT PRECIO, CANTIDAD, ((CANTIDAD*PRECIO)+FLETES) AS MAYBE_FOB ,FOB, FLETES FROM DataSemilla;
-
+SELECT PRECIO, CANTIDAD, ((CANTIDAD*PRECIO)+FLETES) AS MAYBE_FOB , FOB, FLETES
+FROM DataSemilla;
 SELECT DateId
 FROM DimDate
-INNER JOIN DataSemilla ds
+    INNER JOIN DataSemilla ds
     ON (DATEPART(WEEKDAY,ds.FECHA_RECHAZO) = DimDate.DateDay) AND
-    (DATEPART(MONTH,ds.FECHA_RECHAZO) = DimDate.DateMonth) AND
-    (DATEPART(YEAR,ds.FECHA_RECHAZO) = DimDate.DateYear) AND
-    (DATEPART(HOUR,ds.FECHA_RECHAZO) = DimDate.DateHour)
-    OR (
-     (DATEPART(WEEKDAY,ds.FECHA_RECHAZO) IS NULL AND DimDate.DateDay IS NULL) AND
-    (DATEPART(MONTH,ds.FECHA_RECHAZO) IS NULL AND DimDate.DateMonth IS NULL) AND
-    (DATEPART(YEAR,ds.FECHA_RECHAZO) IS NULL AND DimDate.DateYear IS NULL) AND
-    (DATEPART(HOUR,ds.FECHA_RECHAZO) IS NULL AND DimDate.DateHour IS NULL)
-
-    )
-INNER JOIN DimProduct dp
+        (DATEPART(MONTH,ds.FECHA_RECHAZO) = DimDate.DateMonth) AND
+        (DATEPART(YEAR,ds.FECHA_RECHAZO) = DimDate.DateYear) AND
+        (DATEPART(HOUR,ds.FECHA_RECHAZO) = DimDate.DateHour)
+    --     OR (
+    --  (DATEPART(WEEKDAY,ds.FECHA_RECHAZO) IS NULL AND DimDate.DateDay IS NULL)
+    -- )
+    INNER JOIN DimProduct dp
     ON 
     (dp.COD_ITEM = ds.COD_ITEM) AND
-    (dp.ITEM = ds.ITEM) AND
-    (dp.UNIDAD_MEDIDA = ds.UNIDAD_MEDIDA) AND
-    (dp.TIPO_ITEM = ds.TIPO_ITEM) 
+        (dp.ITEM = ds.ITEM) AND
+        (dp.UNIDAD_MEDIDA = ds.UNIDAD_MEDIDA) AND
+        (dp.TIPO_ITEM = ds.TIPO_ITEM)
 ORDER BY DateId;

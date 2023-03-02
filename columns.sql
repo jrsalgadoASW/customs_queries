@@ -85,7 +85,6 @@ FECHA_REVISION
 FECHA_RECHAZO
 FECHA_DIGITALIZACION
 
-TODO: Hacer tabla de calendario. 
 */
 DROP TABLE IF EXISTS DimDate;
 
@@ -117,11 +116,28 @@ OPTION
 (MAXRECURSION
 0);
 
--- TODO: Agregar Semestre y ID para valores null.
 ALTER TABLE DimDate 
 ADD DateId INT IDENTITY(1,1) PRIMARY KEY;
 
+INSERT INTO DimDate(
+    DateDay, 
+    DateHour, 
+    DateMonth, 
+    DateYear,
+    DateWeekDay, 
+    DateMonthName, 
+    DateWeekDayName
+    ) 
+VALUES (NULL, NULL, NULL, NULL, NULL, 'Sin Mes', 'Sin Día de Semana');
 
+ALTER TABLE DimDate
+ADD Semester varchar(12);
+UPDATE DimDate
+SET Semester = CASE WHEN DateMonth <= 6 THEN '1st semestre'
+                WHEN DateMonth IS NULL THEN 'Sin semestre'
+                    ELSE '2nd semestre'
+               END;
+        
 SELECT *
 FROM DimDate
 ORDER BY DateYear, 
