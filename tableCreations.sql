@@ -418,32 +418,65 @@ CREATE TABLE FactImportRegistry
 (
     IdFact INT IDENTITY(1,1) PRIMARY KEY,
 
+    -----Rechazo
+    FechaRechazoID INT,
+    -----Aprobacion
+    FechaAprobacionID INT,
+    -----Definitivo
+    FechaDefinitivoID INT,
+    -----Revision
+    FechaRevisionID INT,
+    -----Digitalizacion
+    FechaDigitalizacionID INT,
+    -----Producto
+    ProductoID INT,
+    -----Origen
+    PaisOrigenID INT,
+    -----Bandera
+    PaisBanderaID INT,
+    -----Destino
+    PaisDestinoID INT,
+    -----Procedencia
+    PaisProcedenciaID INT,
+    -----Compra
+    PaisCompraID INT,
+    -------------------------------EMPRESA---------------------------
+    EmpresaID NVARCHAR(50) NOT NULL,
+    -------------------------------IMportado---------------------------
     ImporterId INT,
-    MODO_TRANSPORTE NVARCHAR(50),
-    CDCIA_USUARIA NVARCHAR(50),
-    CDESTADO VARCHAR(50),
-    CDTRANSACCION INT,
-    siaID INT,
-    ProductId INT,
-    DateId INT,
-    CountryId INT,
+    -------------------------------SIA---------------------------
+    SiaID INT,
+    -------------------------------ESTADO---------------------------
+    EstadoID VARCHAR(50),
+    -------------------------------Tipo Transaccion---------------------------
+    TipoTransaccionID INT,
 
 
     CANTIDAD float,
     PRECIO float,
     PESO_BRUTO float,
     PESO_NETO float,
-    -- TODO: Ver cual de los campos es calculados. 
     FLETES float,
     FOB float,
 
-    FOREIGN KEY (CDCIA_USUARIA) REFERENCES DimCompany(CDCIA_USUARIA),
-    FOREIGN KEY (CDESTADO) REFERENCES DimStatus(CDESTADO),
-    FOREIGN KEY (CDTRANSACCION) REFERENCES DimTransactionType(CDTRANSACCION),
-    FOREIGN KEY (siaID) REFERENCES DimSia(siaID),
-    FOREIGN KEY (ProductId) REFERENCES DimProduct(ProductId),
-    FOREIGN KEY (DateId) REFERENCES DimDate(DateId),
-    FOREIGN KEY (CountryId) REFERENCES DimCountry(CountryId),
+    FOREIGN KEY (EmpresaID) REFERENCES DimCompany(CDCIA_USUARIA),
+    FOREIGN KEY (EstadoID) REFERENCES DimStatus(CDESTADO),
+    FOREIGN KEY (TipoTransaccionID) REFERENCES DimTransactionType(CDTRANSACCION),
+    FOREIGN KEY (SiaID) REFERENCES DimSia(siaID),
+    FOREIGN KEY (ProductoID) REFERENCES DimProduct(ProductId),
+
+    FOREIGN KEY (FechaAprobacionID) REFERENCES DimDate(DateId),
+    FOREIGN KEY (FechaDefinitivoID) REFERENCES DimDate(DateId),
+    FOREIGN KEY (FechaDigitalizacionID) REFERENCES DimDate(DateId),
+    FOREIGN KEY (FechaRechazoID) REFERENCES DimDate(DateId),
+    FOREIGN KEY (FechaRevisionID) REFERENCES DimDate(DateId),
+
+    FOREIGN KEY (PaisBanderaID) REFERENCES DimCountry(CountryId),
+    FOREIGN KEY (PaisCompraID) REFERENCES DimCountry(CountryId),
+    FOREIGN KEY (PaisDestinoID) REFERENCES DimCountry(CountryId),
+    FOREIGN KEY (PaisOrigenID) REFERENCES DimCountry(CountryId),
+    FOREIGN KEY (PaisProcedenciaID) REFERENCES DimCountry(CountryId),
+
     FOREIGN KEY (ImporterId) REFERENCES DimImporter(ImporterId)
 );
 
@@ -471,105 +504,180 @@ BEGIN
 END;
 GO
 
-SELECT
-    ddAprobacion.DateId AS 'Fecha Aprobacion',
-    ddDefinitivo.DateId AS 'Fecha Definitiva',
-    ddDigitalizacion.DateId AS 'Fecha Digitalizacion',
-    ddEjecucion.DateId AS 'Fecha Ejecucion',
-    ddRechazo.DateId AS 'Fecha Rechazo',
-    ddRevision.DateId AS 'Fecha Revision',
-    dp.ProductId,
-    dcBandera.CountryId AS 'Id Bandera',
-    dcCompra.CountryId AS 'Id Compra',
-    dcDestino.CountryId AS 'Id Destino',
-    dcOrigen.CountryId AS 'Id Origen',
-    dcProcedencia.CountryId AS 'Id Procedencia'
-    -- dCompany.CDCIA_USUARIA AS 'CDCIA_USUARIA'
+INSERT INTO FactImportRegistry
+    (
 
--- dCompany.NIT_COMPANIA,
--- dp.ProductId,
--- dSia.siaID,
--- di.NIT_IMPORTADOR,
--- ds.COD_PAIS_ORIGEN,
--- ds.COD_PAIS_DESTINO,
--- ds.COD_PAIS_BANDERA
+    FechaRechazoID,
+    FechaAprobacionID,
+    FechaDefinitivoID,
+    FechaRevisionID,
+    FechaDigitalizacionID,
+
+    ProductoID,
+
+    PaisOrigenID,
+    PaisBanderaID,
+    PaisDestinoID,
+    PaisProcedenciaID,
+    PaisCompraID,
+
+    EmpresaID,
+    ImporterId,
+    SiaID,
+    EstadoID,
+
+    TipoTransaccionID,
+
+    CANTIDAD,
+    PRECIO,
+    PESO_BRUTO,
+    PESO_NETO,
+    FLETES,
+    FOB
+    )
+SELECT
+    -----Rechazo
+    ddRechazo.DateId AS FechaRechazoID,
+    -----Aprobacion
+    ddAprobacion.DateId AS FechaAprobacionID,
+    -----Definitivo
+    ddDefinitivo.DateId AS FechaDefinitivoID,
+    -----Revision
+    ddRevision.DateId AS FechaRevisionID,
+    -----Digitalizacion
+    ddDigitalizacion.DateId AS FechaDigitalizacionID,
+    -----Producto
+    dp.ProductId AS ProductoID,
+    -----Origen
+    dcOrigen.CountryId AS PaisOrigenID,
+    -----Bandera
+    dcBandera.CountryId AS PaisBanderaID,
+    -----Destino
+    dcDestino.CountryId AS PaisDestinoID,
+    -----Procedencia
+    dcProcedencia.CountryId AS PaisProcedenciaID,
+    -----Compra
+    dcCompra.CountryId AS PaisCompraID,
+    -------------------------------EMPRESA---------------------------
+    dCompany.CDCIA_USUARIA AS EmpresaID,
+    -------------------------------IMportado---------------------------
+    di.ImporterId,
+    -------------------------------SIA---------------------------
+    dSia.siaID AS SiaID,
+    -------------------------------ESTADO---------------------------
+    dStatus.CDESTADO AS EstadoID,
+    -------------------------------Tipo Transaccion---------------------------
+    dtt.CDTRANSACCION AS TipoTransaccionID,
+
+    -----------METRICAS
+    ds.CANTIDAD,
+    ds.PRECIO,
+    ds.PESO_BRUTO,
+    ds.PESO_NETO,
+    ds.FLETES,
+    ds.FOB
+
+
 FROM DataSemilla ds
+    --------------------------FECHAS----------------------------------------
+    -----Rechazo
     INNER JOIN DimDate ddRechazo ON 
     (ISNULL(DATEPART(WEEKDAY,ds.FECHA_RECHAZO),-1) = ddRechazo.DateDay) AND
         (ISNULL(DATEPART(MONTH,ds.FECHA_RECHAZO),-1) = ddRechazo.DateMonth) AND
         (ISNULL(DATEPART(YEAR,ds.FECHA_RECHAZO),-1) = ddRechazo.DateYear) AND
         (ISNULL(DATEPART(HOUR,ds.FECHA_RECHAZO),-1) = ddRechazo.DateHour)
 
+    -----Aprobacion
     INNER JOIN DimDate ddAprobacion ON 
         (ISNULL(DATEPART(WEEKDAY,ds.FECHA_APROBACION),-1) = ddAprobacion.DateDay) AND
         (ISNULL(DATEPART(MONTH,ds.FECHA_APROBACION),-1) = ddAprobacion.DateMonth) AND
         (ISNULL(DATEPART(YEAR,ds.FECHA_APROBACION),-1) = ddAprobacion.DateYear) AND
         (ISNULL(DATEPART(HOUR,ds.FECHA_APROBACION),-1) = ddAprobacion.DateHour)
 
+    -----Definitivo
     INNER JOIN DimDate ddDefinitivo ON 
         (ISNULL(DATEPART(WEEKDAY,ds.FECHA_DEFINITIVO),-1) = ddDefinitivo.DateDay) AND
         (ISNULL(DATEPART(MONTH,ds.FECHA_DEFINITIVO),-1) = ddDefinitivo.DateMonth) AND
         (ISNULL(DATEPART(YEAR,ds.FECHA_DEFINITIVO),-1) = ddDefinitivo.DateYear) AND
         (ISNULL(DATEPART(HOUR,ds.FECHA_DEFINITIVO),-1) = ddDefinitivo.DateHour)
 
-
+    -----Definitivo
     INNER JOIN DimDate ddEjecucion ON 
         (ISNULL(DATEPART(WEEKDAY,ds.FECHA_EJECUCION),-1) = ddEjecucion.DateDay) AND
         (ISNULL(DATEPART(MONTH,ds.FECHA_EJECUCION),-1) = ddEjecucion.DateMonth) AND
         (ISNULL(DATEPART(YEAR,ds.FECHA_EJECUCION),-1) = ddEjecucion.DateYear) AND
         (ISNULL(DATEPART(HOUR,ds.FECHA_EJECUCION),-1) = ddEjecucion.DateHour)
 
-
+    -----Revision
     INNER JOIN DimDate ddRevision ON 
         (ISNULL(DATEPART(WEEKDAY,ds.FECHA_REVISION),-1) = ddRevision.DateDay) AND
         (ISNULL(DATEPART(MONTH,ds.FECHA_REVISION),-1) = ddRevision.DateMonth) AND
         (ISNULL(DATEPART(YEAR,ds.FECHA_REVISION),-1) = ddRevision.DateYear) AND
         (ISNULL(DATEPART(HOUR,ds.FECHA_REVISION),-1) = ddRevision.DateHour)
 
+    -----Digitalizacion
     INNER JOIN DimDate ddDigitalizacion ON 
         (ISNULL(DATEPART(WEEKDAY,ds.FECHA_DIGITALIZACION),-1) = ddDigitalizacion.DateDay) AND
         (ISNULL(DATEPART(MONTH,ds.FECHA_DIGITALIZACION),-1) = ddDigitalizacion.DateMonth) AND
         (ISNULL(DATEPART(YEAR,ds.FECHA_DIGITALIZACION),-1) = ddDigitalizacion.DateYear) AND
         (ISNULL(DATEPART(HOUR,ds.FECHA_DIGITALIZACION),-1) = ddDigitalizacion.DateHour)
 
+    -------------------------------PRODUCTO---------------------------
     INNER JOIN DimProduct dp ON 
         (ds.ITEM = dp.ITEM) AND
         (dp.TIPO_ITEM = ds.TIPO_ITEM) AND
         (dp.UNIDAD_MEDIDA = ds.UNIDAD_MEDIDA) AND
         (dp.COD_ITEM = ds.COD_ITEM)
 
+    -------------------------------PAIS---------------------------
+    -----Origen
     INNER JOIN DimCountry dcOrigen ON
         ISNULL(ds.COD_PAIS_ORIGEN, 0) = dcOrigen.CountryCod AND
         ISNULL(ds.PAIS_ORIGEN, 'Pais no especificado') = dcOrigen.CountryName
 
+    -----Bandera
     INNER JOIN DimCountry dcBandera ON
         ISNULL(ds.COD_PAIS_BANDERA, 0) = dcBandera.CountryCod AND
         ISNULL(ds.Bandera, 'Pais no especificado') = dcBandera.CountryName
 
+    -----Destino
     INNER JOIN DimCountry dcDestino ON
         ISNULL(ds.COD_PAIS_DESTINO, 0) = dcDestino.CountryCod AND
         ISNULL(ds.PAIS_DESTINO, 'Pais no especificado') = dcDestino.CountryName
 
+    -----Procedencia
     INNER JOIN DimCountry dcProcedencia ON
         ISNULL(ds.COD_PAIS_PROCEDENCIA, 0) = dcProcedencia.CountryCod AND
         ISNULL(ds.PAIS_PROCEDENCIA, 'Pais no especificado') = dcProcedencia.CountryName
 
+    -----Compra
     INNER JOIN DimCountry dcCompra ON
         ISNULL(ds.COD_PAIS_COMPRA, 0) = dcCompra.CountryCod AND
         ISNULL(ds.PAIS_COMPRA, 'Pais no especificado') = dcCompra.CountryName
 
+    -------------------------------EMPRESA---------------------------
     INNER JOIN DimCompany dCompany ON 
         ISNULL(dCompany.CDCIA_USUARIA,0) = ISNULL(ds.CDCIA_USUARIA,0)
 
+    -------------------------------IMPORTADOR---------------------------
     INNER JOIN DimImporter di ON 
-        ISNULL(ds.NIT_IMPORTADOR,0) = ISNULL(di.NIT_IMPORTADOR,0) AND 
+        ISNULL(ds.NIT_IMPORTADOR,0) = ISNULL(di.NIT_IMPORTADOR,0) AND
         ISNULL(ds.NOMBRE_IMPORTADOR,0) = ISNULL(di.NOMBRE_IMPORTADOR,0)
 
-    -- INNER JOIN DimSia dSia ON 
-    --     ISNULL(ds.NIT_SIA,0) =  ISNULL(dSia.NIT_SIA,0) AND
-    --     ISNULL(ds.NOMBRE_SIA,0) =  ISNULL(dSia.NOMBRE_SIA,0)
+    -------------------------------SIA---------------------------
+    INNER JOIN DimSia dSia ON 
+        ISNULL(ds.NIT_SIA,0) =  ISNULL(dSia.NIT_SIA,0) AND
+        ISNULL(ds.NOMBRE_SIA,0) =  ISNULL(dSia.NOMBRE_SIA,0)
 
-    -- INNER JOIN DimStatus dStatus ON 
-    --     ISNULL(ds.CDESTADO,0) = ISNULL(dStatus.CDESTADO,0)
-    -- INNER JOIN DimTransactionType dtt ON 
-    --     ISNULL(ds.CDTRANSACCION,0) = ISNULL(dtt.CDTRANSACCION,0);
+    -------------------------------ESTADO---------------------------
+    INNER JOIN DimStatus dStatus ON 
+        ISNULL(ds.CDESTADO,0) = ISNULL(dStatus.CDESTADO,0)
+
+    -------------------------------Tipo Transaccion---------------------------
+    INNER JOIN DimTransactionType dtt ON 
+        ISNULL(ds.CDTRANSACCION,0) = ISNULL(dtt.CDTRANSACCION,0);
+GO
+
+SELECT * FROM FactImportRegistry;
+
+GO
